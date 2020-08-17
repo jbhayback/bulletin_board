@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from board import validation
+from board import data_loader
 
 def index(request):
     return render(request, 'login.html')
@@ -10,7 +12,10 @@ def login(request):
     return render(request, 'login.html')
 
 def registration(request):
-    return render(request, 'registration.html')
+    val_result = 0
+    return render(request, 'registration.html', {
+        'val_result' : val_result
+    })
 
 def forgotPassword(request):
     return render(request, 'forgot_password.html')
@@ -29,3 +34,19 @@ def threads(request, thread_id):
     return render(request, 'threads.html', {
         'thread_id' : thread_id,
     })
+
+def profile(request):
+    return render(request, 'profile.html')
+
+def processRegistration(request):
+    request_data = {
+        'username' : request.POST['username'],
+        'email' : request.POST['email'],
+        'password' : request.POST['password'],
+        'retype_password' : request.POST['retype_password'],
+    }
+    val_result = validation.checkRetypedPassword(request_data['password'], request_data['retype_password'])
+    if val_result == 1:
+        data_loader.addUser(request_data)
+        return render(request, 'profile.html', {'username': request_data['username']})
+    return render(request, 'registration.html', {'val_result' : val_result})

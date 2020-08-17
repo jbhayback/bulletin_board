@@ -34,4 +34,3 @@ class Thread(models.Model):
 class Post(models.Model):
     name_of_publisher = models.ForeignKey('Users', on_delete=models.CASCADE)
     date_of_post = models.DateTimeField()
-    
