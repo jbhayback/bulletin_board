@@ -5,7 +5,7 @@
 
   <form action="../../index3.html" method="post">
     <div class="input-group mb-3">
-      <input type="email" class="form-control" placeholder="Email">
+      <input type="email" class="form-control" placeholder="Email/Phone">
       <div class="input-group-append">
         <div class="input-group-text">
           <span class="fas fa-envelope"></span>
@@ -37,7 +37,7 @@
     </div>
   </form>
   <p class="mb-1">
-    <a href="forgot-password.html">I forgot my password</a>
+    <a href="{% url 'forgot_password' %}">I forgot my password</a>
   </p>
   <p class="mb-0">
     <a href="{% url 'registration' %}" class="text-center">Register a new membership</a>

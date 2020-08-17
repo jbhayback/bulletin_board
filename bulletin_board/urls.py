@@ -19,6 +19,12 @@ from board import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('login/', views.login, name='Login'),
-    path('registration/', views.registration, name='registration')
+    path('', views.login, name='index'),
+    path('home/', views.home, name='home'),
+    path('boards/<int:board_id>/', views.boards, name='boards'),
+    path('threads/<int:thread_id>/', views.threads, name='threads'),
+    path('posts/<int:post_id>/', views.posts, name='posts'),
+    path('login/', views.login, name='login'),
+    path('registration/', views.registration, name='registration'),
+    path('forgot_password/', views.forgotPassword, name='forgot_password'),
 ]
