@@ -4,7 +4,7 @@ from .models import *
 
 @admin.register(Users)
 class UsersAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['email', 'phone_number', 'username', 'user_role']
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):

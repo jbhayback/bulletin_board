@@ -9,7 +9,8 @@ def home(request):
     return render(request, 'home.html')
 
 def login(request):
-    return render(request, 'login.html')
+    val_result = 1
+    return render(request, 'login.html', {'val_result' : val_result})
 
 def registration(request):
     val_result = 0
@@ -42,6 +43,7 @@ def processRegistration(request):
     request_data = {
         'username' : request.POST['username'],
         'email' : request.POST['email'],
+        'phone' : request.POST['phone_number'],
         'password' : request.POST['password'],
         'retype_password' : request.POST['retype_password'],
     }
@@ -50,3 +52,14 @@ def processRegistration(request):
         data_loader.addUser(request_data)
         return render(request, 'profile.html', {'username': request_data['username']})
     return render(request, 'registration.html', {'val_result' : val_result})
+
+def processLogin(request):
+    login_data = {
+        'email_or_phone' : request.POST['email_or_phone'],
+        'password' : request.POST['password'],
+    }
+
+    val_result = data_loader.checkUser(login_data)
+    if val_result == 1:
+        return render(request, 'home.html')
+    return render(request, 'login.html', {'val_result' : val_result})

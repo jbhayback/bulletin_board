@@ -1,11 +1,23 @@
 from django.db import models
+from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.auth.models import PermissionsMixin
+from django.utils.translation import gettext_lazy as _
 
-class Users(models.Model):
-    ROLE_CHOICES = [(0, 'Admin'), (1, 'Moderator'), (2, 'Member')]
-    email = models.EmailField(max_length=254)
-    phone_number = models.CharField(max_length=254)
-    username = models.CharField(max_length=254, blank=True)
-    user_role = models.CharField(max_length=10, choices=ROLE_CHOICES)
+from .managers import CustomUserManager
+
+class CustomUser(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(_('email address'), unique=True)
+    phone_number = models.IntegerField(_('phone number'), unique=True)
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    objects = CustomUserManager()
+
+    def __str__(self):
+        return self.email
 
 class UserProfile(models.Model):
     GENDER_CHOICES = [('M', 'Male'), ('F', 'Female')]
