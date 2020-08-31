@@ -2,9 +2,9 @@ from django.contrib import admin
 
 from .models import *
 
-@admin.register(Users)
+@admin.register(CustomUser)
 class UsersAdmin(admin.ModelAdmin):
-    list_display = ['email', 'phone_number', 'username', 'user_role']
+    list_display = ['email', 'phone', 'username']
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):

@@ -28,7 +28,7 @@ urlpatterns = [
     path('login/', views.login, name='login'),
     path('process_login', views.processLogin, name='process_login'),
     path('registration/', views.registration, name='registration'),
-    path('process_registration', views.processRegistration, name='process_registration'),
+    path('process_registration/', views.processRegistration, name='process_registration'),
     path('forgot_password/', views.forgotPassword, name='forgot_password'),
     path('profile', views.processRegistration, name='profile'),
 ]

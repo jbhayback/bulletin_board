@@ -1,6 +1,11 @@
 from django.shortcuts import render
-from board import validation
-from board import data_loader
+from django.http import HttpResponseRedirect
+from django.contrib.auth import get_user_model
+from django.db.models import Q
+
+from .status import Status
+from .validation import FormValidation
+from .authentication import CustomAuthentication
 
 def index(request):
     return render(request, 'login.html')
@@ -9,13 +14,15 @@ def home(request):
     return render(request, 'home.html')
 
 def login(request):
-    val_result = 1
-    return render(request, 'login.html', {'val_result' : val_result})
+    return render(request, 'login.html', {
+        'status' : Status.Success,
+        'message' : None,
+    })
 
 def registration(request):
-    val_result = 0
     return render(request, 'registration.html', {
-        'val_result' : val_result
+        'status' : Status.Success,
+        'message' : None,
     })
 
 def forgotPassword(request):
@@ -47,19 +54,34 @@ def processRegistration(request):
         'password' : request.POST['password'],
         'retype_password' : request.POST['retype_password'],
     }
-    val_result = validation.checkRetypedPassword(request_data['password'], request_data['retype_password'])
-    if val_result == 1:
-        data_loader.addUser(request_data)
+    form_validator = FormValidation(request_data)
+    User = get_user_model()
+    val_result = form_validator.validate(User)
+    if val_result['status'] == Status.Success:
+        extra_data = {
+            'username' : request.POST['username'],
+            'phone' : request.POST['phone_number'],
+        }
+        User.objects.create_user(request_data['email'], request_data['password'], **extra_data)
         return render(request, 'profile.html', {'username': request_data['username']})
-    return render(request, 'registration.html', {'val_result' : val_result})
+    return render(request, 'registration.html', val_result)
 
 def processLogin(request):
-    login_data = {
+    user_data = {
         'email_or_phone' : request.POST['email_or_phone'],
         'password' : request.POST['password'],
     }
+    if request.POST['email_or_phone']:
+        User = get_user_model()
+        authenticator = CustomAuthentication()
+        val_result = authenticator.authenticate(user_data, User)
+        if val_result['status'] == Status.Success:
+            return HttpResponseRedirect('home/')
+    else:
+        val_result = {
+            'status' : Status.EmptyEmailOrPhone,
+            'message' : 'Email of Phone has to be filled!',
+        }
 
-    val_result = data_loader.checkUser(login_data)
-    if val_result == 1:
-        return render(request, 'home.html')
-    return render(request, 'login.html', {'val_result' : val_result})
+    return render(request, 'login.html', val_result)
+    

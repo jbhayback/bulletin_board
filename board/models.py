@@ -6,18 +6,16 @@ from django.utils.translation import gettext_lazy as _
 from .managers import CustomUserManager
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(_('email address'), unique=True)
-    phone_number = models.IntegerField(_('phone number'), unique=True)
+    email = models.EmailField(_('email_address'), unique=True)
+    phone = models.CharField(_('phone_number'), max_length=20,unique=True)
+    username = models.CharField(_('username'), max_length=100, blank=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['phone']
 
     objects = CustomUserManager()
-
-    def __str__(self):
-        return self.email
 
 class UserProfile(models.Model):
     GENDER_CHOICES = [('M', 'Male'), ('F', 'Female')]
@@ -40,9 +38,9 @@ class Board(models.Model):
 
 class Thread(models.Model):
     date_of_last_reply = models.DateTimeField()
-    name_of_last_poster = models.ForeignKey('Users', on_delete=models.CASCADE)
+    name_of_last_poster = models.ForeignKey('CustomUser', on_delete=models.CASCADE)
     post = models.ForeignKey('Post', on_delete=models.CASCADE)
 
 class Post(models.Model):
-    name_of_publisher = models.ForeignKey('Users', on_delete=models.CASCADE)
+    name_of_publisher = models.ForeignKey('CustomUser', on_delete=models.CASCADE)
     date_of_post = models.DateTimeField()
