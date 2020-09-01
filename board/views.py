@@ -1,7 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.contrib.auth import get_user_model
-from django.db.models import Q
 
 from .status import Status
 from .validation import FormValidation
