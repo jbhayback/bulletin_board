@@ -1,6 +1,9 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
+
+from rest_framework.authtoken.models import Token
 
 from .status import Status
 from .validation import FormValidation
@@ -61,9 +64,14 @@ def processRegistration(request):
             'username' : request.POST['username'],
             'phone' : request.POST['phone_number'],
         }
-        User.objects.create_user(request_data['email'], request_data['password'], **extra_data)
-        return render(request, 'profile.html', {'username': request_data['username']})
+        user = User.objects.create_user(request_data['email'], request_data['password'], **extra_data)
+        token = Token.objects.get(user=user).key
+        processEmailActivation(request_data['email'])
+        return render(request, 'profile.html', {'username': request_data['username'], 'token': token})
     return render(request, 'registration.html', val_result)
+
+def processEmailActivation(email):
+    send_mail('Account Activation', 'Please activate your account!!!!', '', [email])
 
 def processLogin(request):
     user_data = {
@@ -83,4 +91,3 @@ def processLogin(request):
         }
 
     return render(request, 'login.html', val_result)
-    
