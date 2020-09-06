@@ -31,4 +31,6 @@ urlpatterns = [
     path('process_registration/', views.processRegistration, name='process_registration'),
     path('forgot_password/', views.forgotPassword, name='forgot_password'),
     path('profile', views.processRegistration, name='profile'),
+    path('account_activation/<str:token_id>/', views.activation, name='activation'),
+    path('logout/', views.logout, name='logout'),
 ]
