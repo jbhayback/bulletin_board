@@ -1,6 +1,12 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
+from django.core.exceptions import ObjectDoesNotExist
+from django.template.loader import render_to_string
+from django.shortcuts import redirect
+
+from rest_framework.authtoken.models import Token
 
 from .status import Status
 from .validation import FormValidation
@@ -10,15 +16,24 @@ def index(request):
     return render(request, 'login.html')
 
 def home(request):
-    return render(request, 'home.html')
+    if 'user' in request.session:
+        user = request.session['user']
+        return render(request, 'home.html', {'user':user})
+    render(request, 'login.html')
 
 def login(request):
+    if 'user' in request.session:
+        user = request.session['user']
+        return HttpResponseRedirect('/home/')
     return render(request, 'login.html', {
         'status' : Status.Success,
         'message' : None,
     })
 
 def registration(request):
+    if 'user' in request.session:
+        user = request.session['user']
+        return HttpResponseRedirect('/home/')
     return render(request, 'registration.html', {
         'status' : Status.Success,
         'message' : None,
@@ -61,9 +76,30 @@ def processRegistration(request):
             'username' : request.POST['username'],
             'phone' : request.POST['phone_number'],
         }
-        User.objects.create_user(request_data['email'], request_data['password'], **extra_data)
-        return render(request, 'profile.html', {'username': request_data['username']})
+        user = User.objects.create_user(request_data['email'], request_data['password'], **extra_data)
+        token = Token.objects.get(user=user).key
+        processEmailActivation(request_data['email'], token)
+        return render(request, 'profile.html', {'username': request_data['username'], 'token': token})
     return render(request, 'registration.html', val_result)
+
+def processEmailActivation(email, token):
+    msg_html = render_to_string('activation_mail.html', {'token':token})
+    send_mail('Account Activation', 'Please activate your account!', '', [email], html_message=msg_html)
+
+def activation(request, token_id):
+    try:
+        token = Token.objects.get(key=token_id)
+    except ObjectDoesNotExist:
+        return render(request, 'unauthorize.html')
+    user_data = get_user_model()
+    user = user_data.objects.get(email=token.user)
+    user.is_active = True
+    user.save()
+    val_result = {
+        'status' : Status.Success,
+        'message' : None,
+    }
+    return render(request, 'login.html', val_result)
 
 def processLogin(request):
     user_data = {
@@ -75,7 +111,9 @@ def processLogin(request):
         authenticator = CustomAuthentication()
         val_result = authenticator.authenticate(user_data, User)
         if val_result['status'] == Status.Success:
-            return HttpResponseRedirect('home/')
+            if 'user' not in request.session:
+                request.session['user'] = user_data['email_or_phone']
+                return HttpResponseRedirect('home/')
     else:
         val_result = {
             'status' : Status.EmptyEmailOrPhone,
@@ -83,4 +121,8 @@ def processLogin(request):
         }
 
     return render(request, 'login.html', val_result)
-    
+
+def logout(request):
+    if 'user' in request.session:
+        del request.session['user']
+    return HttpResponseRedirect('/login/')

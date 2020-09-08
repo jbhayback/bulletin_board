@@ -7,7 +7,7 @@ class CustomAuthentication:
 		try:
 			registered_user = user.objects.get(
 				Q(email = user_data['email_or_phone']) | Q(phone = user_data['email_or_phone']))
-			if registered_user.check_password(user_data['password']):
+			if registered_user.check_password(user_data['password']) and registered_user.is_active:
 				status = Status.Success
 				message = 'Success!'
 			else:
